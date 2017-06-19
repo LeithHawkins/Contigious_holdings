@@ -19,5 +19,8 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number'])as Holdings_Re
         start = time.time()
         refNumber = str(row[0])
 print 'Holding:' + refNumber
+arcpy.Select_analysis('Holdings_Layer', 'in_memory/holding', "Holding_Reference_Number = " + refNumber)
+
+arcpy.MultipartToSinglepart_management('Holdings_Layer', 'in_memory/holding_single')
 
 #print('Time: ' + str(time.time() - start))
