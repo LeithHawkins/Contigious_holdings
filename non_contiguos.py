@@ -25,7 +25,6 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
         dataset = 'in_memory/holding_single'
         dataset_dissolve = 'in_memory/holding_dissolve'
         out_Table = 'in_memory/output_table'
-        print out_Table
 
         result = arcpy.GetCount_management(dataset)
         count = int(result.getOutput(0))
@@ -41,16 +40,20 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
                     return sorted({row[0] for row in cursor})
             #unique_values(out_Table ,'NEAR_DIST')
             large = max(unique_values(out_Table, 'NEAR_DIST'))
+            large_String = str(large)
+
             if large > 200:
                 field = 'Max_Distance'
-                arcpy.Dissolve_management(dataset,dataset_dissolve, ['Holding_Reference_Number'])
-                arcpy.AddField_management(dataset_dissolve, field, 'DOUBLE', '', '','','')
-                while row:
-                    row.setValue(field, row.getValue(large))
-                    cursor.updateRow(row)
-                    row = cursor.next()
-                    pass
-                #     arcpy.FeatureClassToFeatureClass_conversion(dataset, large_Output, 'holding_'+ refNumber )
+                arcpy.Dissolve_management(dataset, dataset_dissolve, [
+                                          'Holding_Reference_Number'])
+                arcpy.AddField_management(
+                    dataset_dissolve, field, 'FLOAT', '', '', '', '')
+                with arcpy.da.UpdateCursor(dataset_dissolve, ['Max_Distance']) as large:
+                    for row in large:
+                        large.updateRow(row)
+                        #arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, large_Output, 'holding_'+ refNumber )
+                        pass
+                    #arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, large_Output, 'holding_'+ refNumber )
 
                 #output_Fc = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb\\Holding\\Holding_Near_Complete'
                 #arcpy.Append_management('in_memory/holding_single', output_Fc, 'NO_TEST','','')
