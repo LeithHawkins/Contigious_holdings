@@ -53,7 +53,7 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
                     for row in large:
                         row[0]=Mval
                         large.updateRow(row)
-                        print 'Test'
+                        print row[0]
                         print large.updateRow(row)
                         fields = arcpy.ListFields('in_memory/holding_dissolve')
                 print 'Fields in Disolve'
