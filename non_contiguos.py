@@ -30,7 +30,7 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
         count = int(result.getOutput(0))
         if count > 1:
             test_Output = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb'
-            large_Output = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb\\test_Output\\'
+            large_Output = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb\\test_Output'
 
             arcpy.GenerateNearTable_analysis(
                 dataset, dataset, out_Table, '', 'NO_LOCATION', 'NO_ANGLE', 'All')
@@ -39,20 +39,29 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
                 with arcpy.da.SearchCursor(table, [Field]) as cursor:
                     return sorted({row[0] for row in cursor})
             #unique_values(out_Table ,'NEAR_DIST')
-            large = max(unique_values(out_Table, 'NEAR_DIST'))
-            large_String = str(large)
+            Mval = max(unique_values(out_Table, 'NEAR_DIST'))
 
-            if large > 200:
-                field = 'Max_Distance'
+            if Mval > 200:
+                print Mval
+                field_name = 'Max_Distance'
                 arcpy.Dissolve_management(dataset, dataset_dissolve, [
                                           'Holding_Reference_Number'])
                 arcpy.AddField_management(
-                    dataset_dissolve, field, 'FLOAT', '', '', '', '')
+                    dataset_dissolve, field_name, 'FLOAT', '', '', '', '')
+
                 with arcpy.da.UpdateCursor(dataset_dissolve, ['Max_Distance']) as large:
                     for row in large:
+                        row[0]=Mval
                         large.updateRow(row)
-                        #arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, large_Output, 'holding_'+ refNumber )
-                        pass
+                        print 'Test'
+                        print large.updateRow(row)
+                        fields = arcpy.ListFields('in_memory/holding_dissolve')
+                print 'Fields in Disolve'
+                for field in fields:
+                    print('{0}'  .format(field.name))
+                print 'Fields Complete'
+                arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, test_Output,'\\holding' + refNumber )
+                        #pass
                     #arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, large_Output, 'holding_'+ refNumber )
 
                 #output_Fc = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb\\Holding\\Holding_Near_Complete'
