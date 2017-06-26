@@ -4,11 +4,11 @@ import time
 # Settings
 baseDirectory = 'B:\\Non_Contigous_Working'
 fileworkspace = baseDirectory + '\\Non_Contiguos_Working.gdb'
-Holdings = fileworkspace + '\\test_Output\\Holding_test'
+Holdings = fileworkspace + '\\Holding\\NTLLS_Holding_190617'
 # arcpy Settings
 arcpy.env.overwriteOutput = True
 env.workspace = fileworkspace
-#B:\Non_Contigous_Working\Non_Contiguos_Working.gdb\test_Output\Holding_test
+
 # SearchCursor
 arcpy.MakeFeatureLayer_management(Holdings, 'Holdings_Layer')
 
@@ -21,8 +21,10 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
         arcpy.SelectLayerByAttribute_management('Holdings_Layer', 'NEW_SELECTION',
                                                 "Holding_Reference_Number = " + str(row[0]))
 
-        arcpy.Buffer_analysis('Holdings_Layer', 'in_memory/holding_bufferfirst',"200 Meters", "FULL", "ROUND", "LIST", "Holding_Reference_Number", "PLANAR")
-        arcpy.Buffer_analysis('in_memory/holding_bufferfirst', 'in_memory/holding_buffersecond', "-200 Meters", "FULL", "ROUND", "LIST", "Holding_Reference_Number", "PLANAR")
+        arcpy.Buffer_analysis('Holdings_Layer', 'in_memory/holding_bufferfirst',
+                              "200 Meters", "FULL", "ROUND", "LIST", "Holding_Reference_Number", "PLANAR")
+        arcpy.Buffer_analysis('in_memory/holding_bufferfirst', 'in_memory/holding_buffersecond',
+                              "-200 Meters", "FULL", "ROUND", "LIST", "Holding_Reference_Number", "PLANAR")
 
         arcpy.MultipartToSinglepart_management(
             'in_memory/holding_buffersecond', 'in_memory/holding_Buffer')
@@ -60,15 +62,17 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
                         print large.updateRow(row)
                         fields = arcpy.ListFields('in_memory/holding_dissolve')
 
-                #arcpy.FeatureClassToFeatureClass_conversion(
-                    #dataset_dissolve, test_Output, '\\holding' + refNumber)
-                #arcpy.Append_management('in_memory/holding_single', output_Fc, 'NO_TEST','','')
-                # pass
-                #arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, large_Output, 'holding_'+ refNumber )
-
                 output_Fc = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb\\output\\Holdings_Multiple'
-                arcpy.Append_management(dataset_dissolve, output_Fc, 'TEST','','')
+                arcpy.Append_management(
+                    dataset_dissolve, output_Fc, 'TEST', '', '')
                 print'Near Complete'
-                #arcpy.Delete_management(dataset,dataset_dissolve, out_Table)
+                arcpy.Delete_management('in_memory/holding_bufferfirst')
+                arcpy.Delete_management('in_memory/holding_buffersecond')
+                arcpy.Delete_management(dataset)
+                arcpy.Delete_management(dataset_dissolve)
+                arcpy.Delete_management(out_Table)
+                del row
+
+
 
     print('Time: ' + str(time.time() - start))
