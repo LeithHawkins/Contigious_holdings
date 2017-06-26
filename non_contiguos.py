@@ -4,11 +4,11 @@ import time
 # Settings
 baseDirectory = 'B:\\Non_Contigous_Working'
 fileworkspace = baseDirectory + '\\Non_Contiguos_Working.gdb'
-Holdings = fileworkspace + '\\Holding\\NTLLS_Holding_190617'
+Holdings = fileworkspace + '\\test_Output\\Holding_test'
 # arcpy Settings
 arcpy.env.overwriteOutput = True
 env.workspace = fileworkspace
-
+#B:\Non_Contigous_Working\Non_Contiguos_Working.gdb\test_Output\Holding_test
 # SearchCursor
 arcpy.MakeFeatureLayer_management(Holdings, 'Holdings_Layer')
 
@@ -20,9 +20,13 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
         start = time.time()
         arcpy.SelectLayerByAttribute_management('Holdings_Layer', 'NEW_SELECTION',
                                                 "Holding_Reference_Number = " + str(row[0]))
+
+        arcpy.Buffer_analysis('Holdings_Layer', 'in_memory/holding_bufferfirst',"200 Meters", "FULL", "ROUND", "LIST", "Holding_Reference_Number", "PLANAR")
+        arcpy.Buffer_analysis('in_memory/holding_bufferfirst', 'in_memory/holding_buffersecond', "-200 Meters", "FULL", "ROUND", "LIST", "Holding_Reference_Number", "PLANAR")
+
         arcpy.MultipartToSinglepart_management(
-            'Holdings_Layer', 'in_memory/holding_single')
-        dataset = 'in_memory/holding_single'
+            'in_memory/holding_buffersecond', 'in_memory/holding_Buffer')
+        dataset = 'in_memory/holding_Buffer'
         dataset_dissolve = 'in_memory/holding_dissolve'
         out_Table = 'in_memory/output_table'
 
