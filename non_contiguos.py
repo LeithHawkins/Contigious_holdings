@@ -4,7 +4,7 @@ import time
 # Settings
 baseDirectory = 'B:\\Non_Contigous_Working'
 fileworkspace = baseDirectory + '\\Non_Contiguos_Working.gdb'
-Holdings = fileworkspace + '\\test_Output\\Holding_test'
+Holdings = fileworkspace + '\\Holding\\NTLLS_Holding_190617'
 # arcpy Settings
 arcpy.env.overwriteOutput = True
 env.workspace = fileworkspace
@@ -38,11 +38,10 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
             def unique_values(table, Field):
                 with arcpy.da.SearchCursor(table, [Field]) as cursor:
                     return sorted({row[0] for row in cursor})
-            #unique_values(out_Table ,'NEAR_DIST')
+
             Mval = max(unique_values(out_Table, 'NEAR_DIST'))
 
             if Mval > 200:
-                print Mval
                 field_name = 'Max_Distance'
                 arcpy.Dissolve_management(dataset, dataset_dissolve, [
                                           'Holding_Reference_Number'])
@@ -51,20 +50,21 @@ with arcpy.da.SearchCursor(Holdings, ['Holding_Reference_Number']) as Holdings_R
 
                 with arcpy.da.UpdateCursor(dataset_dissolve, ['Max_Distance']) as large:
                     for row in large:
-                        row[0]=Mval
+                        row[0] = Mval
                         large.updateRow(row)
                         print row[0]
                         print large.updateRow(row)
                         fields = arcpy.ListFields('in_memory/holding_dissolve')
-                print 'Fields in Disolve'
-                for field in fields:
-                    print('{0}'  .format(field.name))
-                print 'Fields Complete'
-                arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, test_Output,'\\holding' + refNumber )
-                        #pass
-                    #arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, large_Output, 'holding_'+ refNumber )
 
-                #output_Fc = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb\\Holding\\Holding_Near_Complete'
+                #arcpy.FeatureClassToFeatureClass_conversion(
+                    #dataset_dissolve, test_Output, '\\holding' + refNumber)
                 #arcpy.Append_management('in_memory/holding_single', output_Fc, 'NO_TEST','','')
+                # pass
+                #arcpy.FeatureClassToFeatureClass_conversion(dataset_dissolve, large_Output, 'holding_'+ refNumber )
+
+                output_Fc = 'B:\\Non_Contigous_Working\\Non_Contiguos_Working.gdb\\output\\Holdings_Multiple'
+                arcpy.Append_management(dataset_dissolve, output_Fc, 'TEST','','')
                 print'Near Complete'
+                #arcpy.Delete_management(dataset,dataset_dissolve, out_Table)
+
     print('Time: ' + str(time.time() - start))
